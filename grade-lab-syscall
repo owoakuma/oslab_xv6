@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+
+import re
+import subprocess
+from gradelib import *
+
+r = Runner(save("xv6.out"))
+
+@test(40, "exit test")
+def test_exit_test():
+    subprocess.run(["make", "clean"])
+    r.run_qemu(shell_script([
+        'exittest'
+    ]), make_args=["LAB_SYSCALL_TEST=on"])
+    r.match('proc \\d+ exit, parent pid \\d+, name \\w+, state \\w+')
+    r.match('proc \\d+ exit, child 0, pid \\d+, name \\w+, state \\w+')
+    r.match('proc \\d+ exit, child 1, pid \\d+, name \\w+, state \\w+')
+    r.match('proc \\d+ exit, child 2, pid \\d+, name \\w+, state \\w+')
+
+@test(40, "wait test")
+def test_wait_test():
+    r.run_qemu(shell_script([
+        'waittest'
+    ]), make_args=["LAB_SYSCALL_TEST=on"])
+    r.match('wait test OK')
+
+@test(19, "yield test")
+def test_yield_test():
+    r.run_qemu(shell_script([
+        'yieldtest'
+    ]), make_args=["CPUS=1", "LAB_SYSCALL_TEST=on"])
+    r.match("parent yield")
+    matches = re.findall("start to yield, user pc \w+", r.qemu.output, re.MULTILINE)
+    assert_equal(len(matches), 1)
+    sepc = matches[0][24:]
+    toolprefix = test_yield_test.options.toolprefix
+    result = subprocess.run([f"{toolprefix}addr2line", sepc, "-f", "-s", "-e", "user/_yieldtest"], stdout=subprocess.PIPE, check=True)
+    out = result.stdout.decode("utf-8")
+    assert(len(out) > 5)
+    assert_equal(out[:6], "yield\n")
+    r.match("switch to child 0")
+    r.match("switch to child 1")
+    r.match("switch to child 2")
+    r.match("parent yield finished")
+
+@test(1, "time")
+def test_time():
+    check_time()
+
+run_tests()
+
+
+
