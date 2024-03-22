@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/alleyniko/GitRepo/xv6-oslab23-hitsz/build",
+  "command": "/usr/bin/gcc   -g -o CMakeFiles/demo.dir/src/main.c.o -c /home/alleyniko/GitRepo/xv6-oslab23-hitsz/src/main.c",
+  "file": "/home/alleyniko/GitRepo/xv6-oslab23-hitsz/src/main.c"
+}
+]

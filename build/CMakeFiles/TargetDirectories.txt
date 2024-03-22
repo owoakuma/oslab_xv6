@@ -1,0 +1,3 @@
+/home/alleyniko/GitRepo/xv6-oslab23-hitsz/build/CMakeFiles/demo.dir
+/home/alleyniko/GitRepo/xv6-oslab23-hitsz/build/CMakeFiles/edit_cache.dir
+/home/alleyniko/GitRepo/xv6-oslab23-hitsz/build/CMakeFiles/rebuild_cache.dir
