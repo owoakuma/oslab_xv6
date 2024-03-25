@@ -267,6 +267,26 @@ int fork(void) {
   return pid;
 }
 
+// enum to str
+// enum procstate { UNUSED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+// 函数：将进程状态转换为字符串
+const char* getStateString(enum procstate state) {
+    switch (state) {
+    case UNUSED:
+        return "UNUSED";
+    case SLEEPING:
+        return "SLEEPING";
+    case RUNNABLE:
+        return "RUNNABLE";
+    case RUNNING:
+        return "RUNNING";
+    case ZOMBIE:
+        return "ZOMBIE";
+    default:
+        return "UNKNOWN"; // 如果添加了新的状态，但忘了在这里处理
+    }
+}
+
 // Pass p's abandoned children to init.
 // Caller must hold p->lock.
 void reparent(struct proc *p) {
@@ -286,7 +306,9 @@ void reparent(struct proc *p) {
       // initproc->lock, which would be a deadlock, since we hold
       // the lock on one of init's children (pp). this is why
       // exit() always wakes init (before acquiring any locks).
+      exit_info("proc %d exit, child pid %d, name %s, state %s\n",p->pid,pp->pid,pp->name,getStateString(pp->state));
       release(&pp->lock);
+
     }
   }
 }
@@ -332,12 +354,15 @@ void exit(int status) {
   struct proc *original_parent = p->parent;
   release(&p->lock);
 
+  //  print parent info
+
+
   // we need the parent's lock in order to wake it up from wait().
   // the parent-then-child rule says we have to lock it first.
   acquire(&original_parent->lock);
 
   acquire(&p->lock);
-
+  exit_info("proc %d exit, parent pid %d, name %s, state %s\n",p->pid,original_parent->pid,original_parent->name,getStateString(original_parent->state));
   // Give any children to init.
   reparent(p);
 
